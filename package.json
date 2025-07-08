@@ -1,0 +1,28 @@
+{
+  "name": "project-3",
+  "version": "1.0.0",
+  "description": "A full-stack inventory management system built with Express.js, MongoDB, and React.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.10.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "mongoose": "^8.16.1",
+    "multer": "^2.0.1",
+    "recharts": "^2.7.2",
+    "vite": "^6.3.5"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.9.36",
+    "@types/multer": "^1.4.13"
+  }
+}
