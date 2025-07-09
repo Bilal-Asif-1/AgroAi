@@ -146,7 +146,7 @@ const ExpandableCard: React.FC<ExpandableCardProps> = ({ icon, title, children, 
     : "overflow-y-auto max-h-[280px] pr-2";
   const visibleCount = showExpand && !expanded ? maxItems : itemsLength;
   return (
-    <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-shadow p-6 border border-gray-100 flex flex-col h-[370px]">
+    <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-shadow p-6 border border-gray-100 flex flex-col h-[260px] sm:h-[370px]">
       <div className="flex flex-col h-full">
         <div className="flex items-center gap-3 mb-4">
           {icon}
@@ -353,7 +353,7 @@ const Education = () => {
   ];
 
   // Center the last card if odd number of cards
-  const gridCols = 'grid grid-cols-1 md:grid-cols-2 gap-8';
+  const gridCols = 'grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8';
   const lastCardCentered = cards.length % 2 !== 0 ? cards.length - 1 : null;
 
   return (
