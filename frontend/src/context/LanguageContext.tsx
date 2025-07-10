@@ -377,9 +377,6 @@ const translations = {
     'farm.status.good': 'Good',
     'farm.status.pending': 'Pending',
     'farm.status.needswater': 'Needs Water',
-    'crops.tomato': 'Tomato',
-    'crops.wheat': 'Wheat',
-    'crops.cotton': 'Cotton',
   },
   ur: {
     // Navigation
@@ -746,9 +743,6 @@ const translations = {
     'farm.status.good': 'Good',
     'farm.status.pending': 'Pending',
     'farm.status.needswater': 'Needs Water',
-    'crops.tomato': 'ٹماٹر',
-    'crops.wheat': 'گندم',
-    'crops.cotton': 'کپاس',
   }
 };
 

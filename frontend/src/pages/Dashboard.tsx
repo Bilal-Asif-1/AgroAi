@@ -291,16 +291,17 @@ const Dashboard: React.FC = () => {
     });
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+      <div className="space-y-4 sm:space-y-6">
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{t('dashboard.title')}</h1>
-            <p className="text-gray-600 mt-1">{t('dashboard.subtitle')}</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('dashboard.title')}</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-1">{t('dashboard.subtitle')}</p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-gray-600">
-              <Clock className="w-5 h-5" />
+          <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-2 text-gray-600 text-sm sm:text-base">
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
               <span>{t('dashboard.lastUpdated')}</span>
             </div>
           </div>
@@ -312,44 +313,45 @@ const Dashboard: React.FC = () => {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
           </div>
         ) : farmError ? (
-          <div className="bg-red-50 p-4 rounded-lg text-red-700">{farmError}</div>
+          <div className="bg-red-50 p-4 rounded-lg text-red-700 text-sm sm:text-base">{farmError}</div>
         ) : Array.isArray(farms) && farms.length > 0 ? (
-          <div className="mb-4">
-            <div className="flex items-center gap-3 mb-3">
-              <Building2 className="w-5 h-5 text-green-600" />
-              <h2 className="text-lg font-semibold text-gray-700">{t('Select Farm')}</h2>
+          <div className="mb-4 sm:mb-6">
+            <div className="flex items-center gap-2 sm:gap-3 mb-3">
+              <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+              <h2 className="text-base sm:text-lg font-semibold text-gray-700">{t('Select Farm')}</h2>
             </div>
             <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {farms.map((farm) => (
                 <div
                   key={farm._id}
                   onClick={() => setSelectedFarm(farm)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer transition-all duration-200 whitespace-nowrap ${
+                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full cursor-pointer transition-all duration-200 whitespace-nowrap text-sm sm:text-base ${
                     selectedFarm?._id === farm._id
                       ? 'bg-green-100 text-green-700 border border-green-200'
                       : 'bg-white text-gray-600 border border-gray-200 hover:border-green-300'
                   }`}
                 >
-                  <Leaf className="w-4 h-4" />
+                  <Leaf className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span className="font-medium">{farm.name}</span>
-                  <span className="text-sm opacity-75">({farm.city})</span>
+                  <span className="text-xs sm:text-sm opacity-75">({farm.city})</span>
                 </div>
               ))}
             </div>
           </div>
         ) : (
-          <div className="bg-yellow-50 p-4 rounded-lg text-yellow-700 flex items-center gap-3">
-            <AlertCircle className="w-5 h-5" />
+          <div className="bg-yellow-50 p-4 rounded-lg text-yellow-700 flex items-center gap-3 text-sm sm:text-base">
+            <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" />
             <p>{t('No farms available. Please add a farm to get started.')}</p>
           </div>
         )}
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Weather Cards Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <DashboardCard
             title={t('common.temperature')}
             value={`${avgTemp.toFixed(1)}°C`}
             subtext="24h avg"
-            icon={<Thermometer className="w-8 h-8 text-orange-500" />}
+            icon={<Thermometer className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500" />}
             trend="normal"
             bgColor="bg-orange-50"
           />
@@ -357,7 +359,7 @@ const Dashboard: React.FC = () => {
             title={t('common.humidity')}
             value={`${avgHumidity.toFixed(0)}%`}
             subtext="24h avg"
-            icon={<Droplets className="w-8 h-8 text-blue-500" />}
+            icon={<Droplets className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />}
             trend="normal"
             bgColor="bg-blue-50"
           />
@@ -365,7 +367,7 @@ const Dashboard: React.FC = () => {
             title={t('common.windSpeed')}
             value={`${avgWind.toFixed(1)} km/h`}
             subtext="24h avg"
-            icon={<Wind className="w-8 h-8 text-cyan-500" />}
+            icon={<Wind className="w-6 h-6 sm:w-8 sm:h-8 text-cyan-500" />}
             trend="normal"
             bgColor="bg-cyan-50"
           />
@@ -373,41 +375,43 @@ const Dashboard: React.FC = () => {
             title="Rainfall"
             value={`${totalRain.toFixed(1)} mm`}
             subtext="24h total"
-            icon={<CloudRain className="w-8 h-8 text-indigo-500" />}
+            icon={<CloudRain className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-500" />}
             trend="normal"
             bgColor="bg-indigo-50"
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Alerts and Tasks Panel */}
-          <div className="lg:col-span-2 bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <Bell className="w-6 h-6 text-amber-500" />
+          <div className="lg:col-span-2 bg-white rounded-lg shadow p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-xl font-semibold flex items-center gap-2">
+                <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
                 {t('dashboard.activities')}
               </h2>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4">
                 <button
                   onClick={() => {
                     setEditingTask(null);
                     setNewTask({ title: '', description: '', type: 'task', priority: 'medium', dueDate: '' });
                     setShowAddTask(!showAddTask);
                   }}
-                  className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base"
                 >
                   <Plus className="w-4 h-4" />
-                  {t('dashboard.addActivity')}
+                  <span className="hidden sm:inline">{t('dashboard.addActivity')}</span>
+                  <span className="sm:hidden">Add</span>
                 </button>
               </div>
             </div>
 
             {/* Filters and Sort */}
-            <div className="flex flex-wrap gap-4 mb-4">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4 mb-4">
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'date' | 'priority' | 'status')}
-                className="px-3 py-2 border rounded-lg"
+                className="px-3 py-2 border rounded-lg text-sm sm:text-base"
               >
                 <option value="date">{t('dashboard.sortByDate')}</option>
                 <option value="priority">{t('dashboard.sortByPriority')}</option>
@@ -416,7 +420,7 @@ const Dashboard: React.FC = () => {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value as 'all' | 'pending' | 'completed')}
-                className="px-3 py-2 border rounded-lg"
+                className="px-3 py-2 border rounded-lg text-sm sm:text-base"
               >
                 <option value="all">{t('dashboard.allActivities')}</option>
                 <option value="pending">{t('dashboard.pendingActivities')}</option>
@@ -425,7 +429,7 @@ const Dashboard: React.FC = () => {
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value as 'all' | 'task' | 'suggestion')}
-                className="px-3 py-2 border rounded-lg"
+                className="px-3 py-2 border rounded-lg text-sm sm:text-base"
               >
                 <option value="all">{t('dashboard.allTypes')}</option>
                 <option value="task">{t('dashboard.tasks')}</option>
@@ -441,133 +445,130 @@ const Dashboard: React.FC = () => {
                     placeholder={t('dashboard.activityTitle')}
                     value={newTask.title}
                     onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 border rounded-lg text-sm sm:text-base"
                   />
                   <textarea
                     placeholder={t('dashboard.activityDescription')}
                     value={newTask.description}
                     onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 border rounded-lg text-sm sm:text-base"
                     rows={3}
                   />
-                  <select
-                    value={newTask.type}
-                    onChange={(e) => setNewTask({ ...newTask, type: e.target.value as 'task' | 'suggestion' })}
-                    className="w-full px-3 py-2 border rounded-lg"
-                  >
-                    <option value="task">{t('dashboard.task')}</option>
-                    <option value="suggestion">{t('dashboard.recommendation')}</option>
-                  </select>
-                  <select
-                    value={newTask.priority}
-                    onChange={(e) => setNewTask({ ...newTask, priority: e.target.value as 'low' | 'medium' | 'high' })}
-                    className="w-full px-3 py-2 border rounded-lg"
-                  >
-                    <option value="low">{t('dashboard.lowPriority')}</option>
-                    <option value="medium">{t('dashboard.mediumPriority')}</option>
-                    <option value="high">{t('dashboard.highPriority')}</option>
-                  </select>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <select
+                      value={newTask.type}
+                      onChange={(e) => setNewTask({ ...newTask, type: e.target.value as 'task' | 'suggestion' })}
+                      className="w-full px-3 py-2 border rounded-lg text-sm sm:text-base"
+                    >
+                      <option value="task">{t('dashboard.task')}</option>
+                      <option value="suggestion">{t('dashboard.recommendation')}</option>
+                    </select>
+                    <select
+                      value={newTask.priority}
+                      onChange={(e) => setNewTask({ ...newTask, priority: e.target.value as 'low' | 'medium' | 'high' })}
+                      className="w-full px-3 py-2 border rounded-lg text-sm sm:text-base"
+                    >
+                      <option value="low">{t('dashboard.lowPriority')}</option>
+                      <option value="medium">{t('dashboard.mediumPriority')}</option>
+                      <option value="high">{t('dashboard.highPriority')}</option>
+                    </select>
+                  </div>
                   <input
                     type="date"
                     value={newTask.dueDate}
                     onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg"
-                    placeholder={t('dashboard.dueDate')}
+                    className="w-full px-3 py-2 border rounded-lg text-sm sm:text-base"
                   />
-                  <div className="flex justify-end gap-2">
+                  <div className="flex gap-2">
                     <button
-                      onClick={() => {
-                        setShowAddTask(false);
-                        setEditingTask(null);
-                      }}
-                      className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                      onClick={handleAddTask}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base"
                     >
-                      {t('dashboard.cancel')}
+                      {t('dashboard.addActivity')}
                     </button>
                     <button
-                      onClick={editingTask ? handleUpdateTask : handleAddTask}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                      onClick={() => setShowAddTask(false)}
+                      className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm sm:text-base"
                     >
-                      {editingTask ? t('dashboard.updateActivity') : t('dashboard.addActivity')}
+                      Cancel
                     </button>
                   </div>
                 </div>
               </div>
             )}
 
-            <div className="space-y-4">
+            {/* Tasks List */}
+            <div className="space-y-3 sm:space-y-4">
               {filteredAndSortedTasks.map((task) => (
-                <div
-                  key={task.id}
-                  className={`p-4 rounded-lg border ${
-                    task.status === 'completed' ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      {task.status === 'completed' ? (
-                        <CheckCircle 
-                          className="w-5 h-5 text-green-500 cursor-pointer" 
-                          onClick={() => toggleTaskStatus(task.id)}
-                        />
-                      ) : task.type === 'suggestion' ? (
-                        <AlertCircle className="w-5 h-5 text-yellow-500" />
-                      ) : (
-                        <Clock 
-                          className="w-5 h-5 text-blue-500 cursor-pointer" 
-                          onClick={() => toggleTaskStatus(task.id)}
-                        />
-                      )}
-                      <div>
-                        <h3 className="font-medium">{t(task.title)}</h3>
-                        <div className="flex items-center gap-2 text-sm">
-                          <span className={`${getPriorityColor(task.priority)}`}>
-                            {t(`dashboard.priority${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}`)}
-                          </span>
-                          {task.dueDate && (
-                            <span className="text-gray-500">
-                              {t('dashboard.due')}: {task.dueDate}
-                            </span>
-                          )}
+                <div key={task.id} className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-1">
+                          <button
+                            onClick={() => toggleTaskStatus(task.id)}
+                            className={`p-1 rounded-full transition-colors ${
+                              task.status === 'completed'
+                                ? 'text-green-600 hover:text-green-700'
+                                : 'text-gray-400 hover:text-gray-600'
+                            }`}
+                          >
+                            <CheckCircle className={`w-5 h-5 ${task.status === 'completed' ? 'fill-current' : ''}`} />
+                          </button>
+                          <div className="flex-1 min-w-0">
+                            <h3 className={`font-medium text-sm sm:text-base ${task.status === 'completed' ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+                              {t(task.title)}
+                            </h3>
+                            <div className="flex items-center gap-2 text-xs sm:text-sm mt-1">
+                              <span className={`${getPriorityColor(task.priority)}`}>
+                                {t(`dashboard.priority${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}`)}
+                              </span>
+                              {task.dueDate && (
+                                <span className="text-gray-500">
+                                  {t('dashboard.due')}: {task.dueDate}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 sm:gap-2">
+                          <span className="text-xs sm:text-sm text-gray-500">{task.date}</span>
+                          <button
+                            onClick={() => handleEditTask(task)}
+                            className="p-1 text-gray-500 hover:text-green-600 transition-colors"
+                            title={t('dashboard.editActivity')}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteTask(task.id)}
+                            className="p-1 text-gray-500 hover:text-red-600 transition-colors"
+                            title={t('dashboard.deleteActivity')}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-500">{task.date}</span>
-                      <button
-                        onClick={() => handleEditTask(task)}
-                        className="p-1 text-gray-500 hover:text-green-600"
-                        title={t('dashboard.editActivity')}
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTask(task.id)}
-                        className="p-1 text-gray-500 hover:text-red-600"
-                        title={t('dashboard.deleteActivity')}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <p className="mt-2 text-xs sm:text-sm text-gray-600">{t(task.description)}</p>
+                      {task.type === 'suggestion' && (
+                        <div className="mt-2 text-xs text-indigo-600">
+                          {t('dashboard.recommendation')}
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <p className="mt-2 text-sm text-gray-600">{t(task.description)}</p>
-                  {task.type === 'suggestion' && (
-                    <div className="mt-2 text-xs text-indigo-600">
-                      {t('dashboard.recommendation')}
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
           </div>
 
           {/* Farm Health Overview */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-              <Sprout className="w-6 h-6 text-green-500" />
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 flex items-center gap-2">
+              <Sprout className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
               {t('common.farmHealth')}
             </h2>
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <HealthMetric
                 label={t('common.cropHealth')}
                 value={health.cropHealth.toString()}
@@ -606,16 +607,16 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
   bgColor = 'bg-white'
 }) => {
   return (
-    <div className={`${bgColor} p-6 rounded-lg shadow`}>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">{title}</h2>
+    <div className={`${bgColor} p-3 sm:p-4 lg:p-6 rounded-lg shadow transition-all duration-300 hover:shadow-md`}>
+      <div className="flex items-center justify-between mb-2 sm:mb-4">
+        <h2 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-700">{title}</h2>
         {icon}
       </div>
-      <p className="text-3xl font-bold mb-2">{value}</p>
-      <div className="flex items-center text-sm text-gray-600">
+      <p className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2 text-gray-900">{value}</p>
+      <div className="flex items-center text-xs sm:text-sm text-gray-600">
         <span>{subtext}</span>
         {trend !== 'normal' && (
-          <span className={`ml-2 ${trend === 'up' ? 'text-green-500' : 'text-red-500'}`}>
+          <span className={`ml-1 sm:ml-2 ${trend === 'up' ? 'text-green-500' : 'text-red-500'}`}>
             {trend === 'up' ? '↑' : '↓'}
           </span>
         )}

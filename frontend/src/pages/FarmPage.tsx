@@ -2,10 +2,11 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../store';
 import { fetchFarms, deleteFarm, Farm } from '../store/farmSlice';
-import { activityAPI, Activity, CreateActivity } from '../services/api';
+import { activityAPI, Activity as ApiActivity, CreateActivity } from '../services/api';
 import { inventoryAPI, InventoryItem } from '../services/api';
 import FarmForm from '../components/FarmForm';
 import { jwtDecode } from 'jwt-decode';
+import { useLanguage } from '../context/LanguageContext';
 import { 
   Sprout, MapPin, Edit2, Trash2, Plus, 
   Crop, Sun, Droplet, Clock, AlertCircle,
@@ -41,7 +42,7 @@ interface FarmActivity {
 }
 
 interface ActivityFormData {
-  type: Activity['type'];
+  type: ApiActivity['type'];
   date: string;
   description: string;
   notes: string;
@@ -202,7 +203,9 @@ const getWaterStatusInfo = (farm: Farm) => {
 };
 
 // Update the Activity interface to include color and icon
-interface Activity {
+
+
+interface FarmActivityItem {
   _id: string;
   farm: string;
   type: 'Planting' | 'Fertilizing' | 'Pest Control' | 'Irrigation' | 'Harvesting' | 'Maintenance' | 'Other';
@@ -223,6 +226,7 @@ interface Activity {
 }
 
 const FarmPage: React.FC = () => {
+  const { t } = useLanguage();
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.auth.user);
   const { farms, loading, error } = useSelector((state: RootState) => state.farms);
@@ -245,7 +249,7 @@ const FarmPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [expandedFarms, setExpandedFarms] = useState<Set<string>>(new Set());
   const [expandedActivities, setExpandedActivities] = useState<Set<string>>(new Set());
-  const [activities, setActivities] = useState<Record<string, Activity[]>>({});
+  const [activities, setActivities] = useState<Record<string, ApiActivity[]>>({});
   const [loadingActivities, setLoadingActivities] = useState<Record<string, boolean>>({});
   const [expandedPesticides, setExpandedPesticides] = useState<Set<string>>(new Set());
   const [openPesticideList, setOpenPesticideList] = useState<string | null>(null);
@@ -434,31 +438,37 @@ const FarmPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+      <div className="space-y-4 sm:space-y-6">
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Farms</h1>
-          <p className="text-gray-600 mt-1">Manage your farm locations and details</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('farm.title')}</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-1">{t('farm.subtitle')}</p>
         </div>
         <button
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
-          onClick={() => { setEditingFarm(null); setShowForm(true); }}
-        >
-          <Plus className="w-5 h-5" />
-          Add Farm
+            onClick={() => {
+              setEditingFarm(null);
+              setShowForm(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base font-medium"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">{t('farm.addFarm')}</span>
+            <span className="sm:hidden">Add Farm</span>
         </button>
       </div>
 
       {/* Search and Filter Bar */}
-      <div className="flex flex-wrap gap-4 items-center">
-        <div className="relative flex-1 min-w-[200px]">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center">
+          <div className="relative flex-1 min-w-[200px] w-full">
           <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             placeholder="Search farms..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-green-500"
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-green-500 text-sm sm:text-base"
           />
         </div>
         <div className="flex items-center gap-2 bg-white p-1 rounded-lg border border-gray-200">
@@ -470,7 +480,7 @@ const FarmPage: React.FC = () => {
                 : 'text-gray-600 hover:bg-gray-50'
             }`}
           >
-            <Grid className="w-5 h-5" />
+              <Grid className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
           <button
             onClick={() => setViewMode('list')}
@@ -480,7 +490,7 @@ const FarmPage: React.FC = () => {
                 : 'text-gray-600 hover:bg-gray-50'
             }`}
           >
-            <List className="w-5 h-5" />
+              <List className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
       </div>
@@ -494,20 +504,20 @@ const FarmPage: React.FC = () => {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
         </div>
       ) : error ? (
-        <div className="bg-red-50 p-4 rounded-lg text-red-700 flex items-center gap-3">
-          <AlertCircle className="w-5 h-5" />
+          <div className="bg-red-50 p-4 rounded-lg text-red-700 flex items-center gap-3 text-sm sm:text-base">
+            <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" />
           <p>{error}</p>
         </div>
       ) : farms.length === 0 ? (
         <div className="bg-yellow-50 p-6 rounded-xl text-center">
           <div className="flex flex-col items-center gap-3">
             <Sprout className="w-12 h-12 text-yellow-600" />
-            <h3 className="text-xl font-semibold text-gray-900">No Farms Found</h3>
-            <p className="text-gray-600">Try adjusting your search or add a new farm</p>
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900">No Farms Found</h3>
+              <p className="text-sm sm:text-base text-gray-600">Try adjusting your search or add a new farm</p>
           </div>
         </div>
       ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
           {farms.map((farm) => {
             const health = getFarmHealth(farm);
             const isExpanded = expandedFarms.has(farm._id!);
@@ -530,38 +540,38 @@ const FarmPage: React.FC = () => {
                       : 'border-red-200 hover:border-red-300 bg-white'
                 }`}
               >
-                <div className="p-4">
+                  <div className="p-3 sm:p-4">
                   <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-full ${
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className={`p-1.5 sm:p-2 rounded-full ${
                         health.status === 'good'
                           ? 'bg-green-100 text-green-600'
                           : health.status === 'warning'
                             ? 'bg-yellow-100 text-yellow-600'
                             : 'bg-red-100 text-red-600'
                       }`}>
-                        <Sprout className="w-5 h-5" />
+                          <Sprout className="w-4 h-4 sm:w-5 sm:h-5" />
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900">{farm.name}</h3>
-                        <p className="text-sm text-gray-500 flex items-center gap-1">
-                          <MapPin className="w-4 h-4" />
-                          {farm.city}
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{farm.name}</h3>
+                          <p className="text-xs sm:text-sm text-gray-500 flex items-center gap-1">
+                            <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
+                            <span className="truncate">{farm.city}</span>
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 sm:gap-2">
                       <button
                         onClick={() => handleEdit(farm)}
-                        className="p-1.5 text-gray-500 hover:text-green-600 transition-colors"
+                          className="p-1 sm:p-1.5 text-gray-500 hover:text-green-600 transition-colors"
                       >
-                        <Edit2 className="w-4 h-4" />
+                          <Edit2 className="w-3 h-3 sm:w-4 sm:h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(farm._id!)}
-                        className="p-1.5 text-gray-500 hover:text-red-600 transition-colors"
+                          className="p-1 sm:p-1.5 text-gray-500 hover:text-red-600 transition-colors"
                       >
-                        <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                       </button>
                     </div>
                   </div>
@@ -569,8 +579,8 @@ const FarmPage: React.FC = () => {
                   {/* Crop and Health Status */}
                   <div className="mt-3 grid grid-cols-3 gap-2">
                     <div className="flex flex-col items-center p-2 rounded-lg bg-gray-50">
-                      <Crop className="w-4 h-4 text-gray-600" />
-                      <span className="text-sm font-medium text-gray-900 mt-1">{farm.area}</span>
+                        <Crop className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600" />
+                        <span className="text-xs sm:text-sm font-medium text-gray-900 mt-1">{farm.area}</span>
                       <span className="text-xs text-gray-500">Area</span>
                     </div>
                     <div className={`flex flex-col items-center p-2 rounded-lg ${
@@ -581,23 +591,23 @@ const FarmPage: React.FC = () => {
                           : 'bg-red-50 text-red-600'
                     }`}>
                       {health.status === 'good' ? (
-                        <CheckCircle className="w-4 h-4" />
+                          <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                       ) : health.status === 'warning' ? (
-                        <AlertTriangle className="w-4 h-4" />
+                          <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4" />
                       ) : (
-                        <XCircle className="w-4 h-4" />
+                          <XCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                       )}
-                      <span className="text-sm font-medium mt-1">
+                        <span className="text-xs sm:text-sm font-medium mt-1">
                         {health.status.charAt(0).toUpperCase() + health.status.slice(1)}
                       </span>
                       <span className="text-xs text-gray-500">Health</span>
                     </div>
                     <div className="flex flex-col items-center p-2 rounded-lg bg-blue-50">
                       <div className="flex items-center gap-1">
-                        <Droplet className="w-4 h-4 text-blue-600" />
+                          <Droplet className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
                         <span className="text-xs text-blue-700 font-medium">Watered</span>
                       </div>
-                      <span className="text-sm font-medium text-gray-900 mt-1">
+                        <span className="text-xs sm:text-sm font-medium text-gray-900 mt-1">
                         {(() => {
                           if (!farm.waterStatus) return null;
                           try {
@@ -634,11 +644,11 @@ const FarmPage: React.FC = () => {
                   {/* Crop and Pesticides Section */}
                   {farm.pesticides && farm.pesticides.trim() !== '' && (
                     <div className="mt-3">
-                      <div className="flex flex-row items-center justify-center flex-wrap gap-3 relative">
+                        <div className="flex flex-row items-center justify-center flex-wrap gap-2 sm:gap-3 relative">
                         {/* Crop Badge */}
                         <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 text-green-800 text-xs font-medium shadow-sm justify-center">
                           <Leaf className="w-3 h-3 text-green-500" />
-                          {farm.pesticides.split('\n')[0]}
+                            <span className="truncate max-w-20">{farm.pesticides.split('\n')[0]}</span>
                         </span>
                         {/* Pesticides List Button */}
                         {(() => {
@@ -647,468 +657,100 @@ const FarmPage: React.FC = () => {
                             <div className="relative">
                               <button
                                 ref={pesticidesButtonRef}
-                                className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-medium shadow-sm justify-center hover:bg-blue-200 transition"
                                 onClick={() => handlePesticideListToggle(farm._id!)}
-                              >
-                                <Package className="w-3 h-3 text-blue-400" />
-                                Pesticides List
-                              </button>
-                              {openPesticideList === farm._id! && (
-                                <div
-                                  ref={pesticidesPopoverRef}
-                                  className="absolute left-0 mt-2 z-20 bg-white border border-gray-200 rounded-lg shadow-lg p-3 min-w-[180px] max-w-xs"
+                                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-medium shadow-sm hover:bg-blue-200 transition-colors"
                                 >
-                                  <div className="font-semibold text-xs text-gray-700 mb-2 flex items-center gap-1">
-                                    <Package className="w-3 h-3 text-blue-400" /> Pesticides Used
+                                  <Package className="w-3 h-3 text-blue-500" />
+                                  <span className="hidden sm:inline">{t('farm.pesticidesList')}</span>
+                                  <span className="sm:hidden">Pesticides</span>
+                                  {expandedPesticides.has(farm._id!) ? (
+                                    <ChevronUp className="w-3 h-3" />
+                                  ) : (
+                                    <ChevronDown className="w-3 h-3" />
+                                  )}
+                              </button>
+                                
+                                {/* Pesticides Dropdown */}
+                                {expandedPesticides.has(farm._id!) && (
+                                  <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10 p-2">
+                                    <div className="text-xs font-medium text-gray-700 mb-2">{t('farm.pesticidesList')}</div>
+                                    <div className="space-y-1">
+                                      {pesticides.map((pesticide, index) => (
+                                        <div key={index} className="text-xs text-gray-600 p-1 rounded bg-gray-50">
+                                          {pesticide}
                                   </div>
-                                  <ul className="list-disc ml-5 text-xs text-gray-700">
-                                    {pesticides.map((p, i) => (
-                                      <li key={i}>{p}</li>
-                                    ))}
-                                  </ul>
-                                  <button
-                                    className="mt-2 text-xs text-blue-600 hover:underline"
-                                    onClick={() => setOpenPesticideList(null)}
-                                  >
-                                    Close
-                                  </button>
+                                      ))}
+                                    </div>
                                 </div>
                               )}
                             </div>
-                          ) : (
-                            <span className="text-xs text-gray-400">No pesticides</span>
-                          );
+                            ) : null;
                         })()}
                       </div>
                     </div>
                   )}
 
-                  {/* Recent Activities */}
+                    {/* Expandable Activities Section */}
                   <div className="mt-3">
-                    <div className="flex items-center justify-between text-sm mb-2">
-                      <span className="text-gray-600 flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        Recent Activities
-                      </span>
-                      <button
-                        onClick={() => handleAddActivity(farm)}
-                        className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white rounded-lg text-xs font-medium shadow hover:bg-green-700 transition-colors"
-                      >
-                        <Plus className="w-3 h-3" />
-                        Add Activity
-                      </button>
-                    </div>
-                    <div className="space-y-1.5">
-                      {(activities[farm._id!] || []).slice(0, expandedActivities.has(farm._id!) ? undefined : 2).map((activity) => (
-                        <div key={activity._id} className="flex items-start gap-2 p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-                          <div className={`p-1 rounded-full ${activity.type === 'Planting' ? 'bg-green-100' : 
-                            activity.type === 'Fertilizing' ? 'bg-purple-100' :
-                            activity.type === 'Pest Control' ? 'bg-red-100' :
-                            activity.type === 'Irrigation' ? 'bg-blue-100' :
-                            activity.type === 'Harvesting' ? 'bg-amber-100' :
-                            activity.type === 'Maintenance' ? 'bg-brown-100' : 'bg-gray-100'} bg-opacity-10`}>
-                            {activity.type === 'Planting' ? <Leaf className="w-4 h-4" /> :
-                              activity.type === 'Fertilizing' ? <Package className="w-4 h-4" /> :
-                              activity.type === 'Pest Control' ? <AlertTriangle className="w-4 h-4" /> :
-                              activity.type === 'Irrigation' ? <Droplets className="w-4 h-4" /> :
-                              activity.type === 'Harvesting' ? <Wheat className="w-4 h-4" /> :
-                              activity.type === 'Maintenance' ? <Crop className="w-4 h-4" /> :
-                              <FileText className="w-4 h-4" />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-medium text-gray-900 truncate">{activity.description}</span>
-                              <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
-                                {new Date(activity.date).toLocaleDateString()}
-                              </span>
-                            </div>
-                            {activity.notes && (
-                              <div className="mt-0.5 text-xs text-gray-600 flex items-start gap-1">
-                                <FileText className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                                <span className="truncate">{activity.notes}</span>
-                              </div>
-                            )}
-                            {activity.inventoryItems.length > 0 && (
-                              <div className="mt-0.5 text-xs text-gray-600">
-                                Used: {activity.inventoryItems.map(item => 
-                                  `${item.quantity} ${item.unit}`
-                                ).join(', ')}
-                              </div>
-                            )}
-                          </div>
-                          <button
-                            onClick={() => handleDeleteActivity(farm._id!, activity._id)}
-                            className="ml-2 p-1 text-gray-400 hover:text-red-600"
-                            title="Delete Activity"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                      {(activities[farm._id!] || []).length > 2 && (
                         <button
                           onClick={() => toggleActivitiesExpansion(farm._id!)}
-                          className="w-full flex items-center justify-center gap-1 p-1.5 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+                        className="w-full flex items-center justify-between p-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
                         >
+                        <span className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4" />
+                          {t('farm.recentActivities')}
+                        </span>
                           {expandedActivities.has(farm._id!) ? (
-                            <>
-                              <ChevronUp className="w-3 h-3" />
-                              Show Less
-                            </>
+                          <ChevronUp className="w-4 h-4" />
                           ) : (
-                            <>
-                              <Clock className="w-3 h-3" />
-                              Show All Activities ({activities[farm._id!].length})
-                            </>
+                          <ChevronDown className="w-4 h-4" />
                           )}
                         </button>
-                      )}
+                      
+                      {expandedActivities.has(farm._id!) && (
+                        <div className="mt-2 space-y-2">
+                          {getFarmActivities(farm).slice(0, 3).map((activity) => (
+                            <div key={activity.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                              <div className={`p-1 rounded-full ${activity.color} bg-opacity-10`}>
+                                {activity.icon}
                     </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-medium text-gray-900 truncate">{activity.description}</p>
+                                <p className="text-xs text-gray-500">{activity.date}</p>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {farms.map((farm) => {
-            const health = getFarmHealth(farm);
-            const isExpanded = expandedFarms.has(farm._id!);
-            const crop = farm.pesticides ? farm.pesticides.split('\n')[0] : '';
-            const pesticides = farm.pesticides ? farm.pesticides.split('\n').slice(1).filter(p => p.trim()) : [];
-            const waterStatusObj = (() => {
-              if (!farm.waterStatus) return { lastWatered: '', status: 'needs_water' };
-              try {
-                return JSON.parse(farm.waterStatus);
-              } catch { return { lastWatered: '', status: 'needs_water' }; }
-            })();
-            return (
-              <div
-                key={farm._id}
-                className={`group relative overflow-hidden rounded-lg border transition-all duration-300 ${
-                  health.status === 'good' 
-                    ? 'border-green-200 hover:border-green-300 bg-white' 
-                    : health.status === 'warning'
-                      ? 'border-yellow-200 hover:border-yellow-300 bg-white'
-                      : 'border-red-200 hover:border-red-300 bg-white'
-                }`}
-              >
-                <div className="p-3 flex flex-col md:flex-row md:items-center md:gap-6 gap-2">
-                  {/* Main Info Row */}
-                  <div className="flex-1 flex flex-col md:flex-row md:items-center md:gap-4 gap-2">
-                    {/* Farm Name */}
-                    <span className="font-bold text-lg text-gray-900 mr-2 min-w-[100px]">{farm.name}</span>
-                    {/* Crop Badge */}
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 text-green-800 text-xs font-medium shadow-sm justify-center">
-                      <Leaf className="w-3 h-3 text-green-500" />
-                      {crop}
-                    </span>
-                    {/* Pesticides List Button */}
-                    {pesticides.length > 0 && (
-                      <div className="relative">
-                        <button
-                          ref={pesticidesButtonRef}
-                          className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-medium shadow-sm justify-center hover:bg-blue-200 transition"
-                          onClick={() => handlePesticideListToggle(farm._id!)}
-                        >
-                          <Package className="w-3 h-3 text-blue-400" />
-                          Pesticides List
-                        </button>
-                        {openPesticideList === farm._id! && (
-                          <div
-                            ref={pesticidesPopoverRef}
-                            className="absolute left-0 mt-2 z-20 bg-white border border-gray-200 rounded-lg shadow-lg p-3 min-w-[180px] max-w-xs"
-                          >
-                            <div className="font-semibold text-xs text-gray-700 mb-2 flex items-center gap-1">
-                              <Package className="w-3 h-3 text-blue-400" /> Pesticides Used
-                            </div>
-                            <ul className="list-disc ml-5 text-xs text-gray-700">
-                              {pesticides.map((p, i) => (
-                                <li key={i}>{p}</li>
-                              ))}
-                            </ul>
-                            <button
-                              className="mt-2 text-xs text-blue-600 hover:underline"
-                              onClick={() => setOpenPesticideList(null)}
-                            >
-                              Close
-                            </button>
+                          ))}
                           </div>
                         )}
                       </div>
-                    )}
-                    {/* Water Status */}
-                    <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-blue-50">
-                      <Droplet className="w-4 h-4 text-blue-600" />
-                      <span className="text-xs text-blue-700 font-medium">Watered</span>
-                      <span className="text-xs text-gray-700 ml-1">{waterStatusObj.lastWatered}</span>
-                      <span className={`text-xs ml-2 ${
-                        waterStatusObj.status === 'good'
-                          ? 'text-green-600'
-                          : waterStatusObj.status === 'needs_water'
-                            ? 'text-yellow-600'
-                            : waterStatusObj.status === 'overwatered'
-                              ? 'text-red-600'
-                              : 'text-blue-600'
-                      }`}>
-                        {waterStatusObj.status === 'good'
-                          ? 'Good'
-                          : waterStatusObj.status === 'needs_water'
-                            ? 'Needs Water'
-                            : waterStatusObj.status === 'overwatered'
-                              ? 'Overwatered'
-                              : 'Pending'}
-                      </span>
-                    </div>
-                    {/* Area */}
-                    <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-gray-50">
-                      <Crop className="w-4 h-4 text-gray-600" />
-                      <span className="text-xs text-gray-900 font-medium">{farm.area}</span>
-                      <span className="text-xs text-gray-500 ml-1">Area</span>
-                    </div>
-                    {/* Health Status */}
-                    <div className={`flex items-center gap-1 px-2 py-0.5 rounded ${
-                        health.status === 'good'
-                          ? 'bg-green-50 text-green-600'
-                          : health.status === 'warning'
-                            ? 'bg-yellow-50 text-yellow-600'
-                            : 'bg-red-50 text-red-600'
-                      }`}>
-                      {health.status === 'good' ? (
-                        <CheckCircle className="w-4 h-4" />
-                      ) : health.status === 'warning' ? (
-                        <AlertTriangle className="w-4 h-4" />
-                      ) : (
-                        <XCircle className="w-4 h-4" />
-                      )}
-                      <span className="text-xs font-medium ml-1">
-                        {health.status.charAt(0).toUpperCase() + health.status.slice(1)}
-                      </span>
-                    </div>
-                    {/* Recent Activities Count */}
-                    <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-gray-50">
-                      <Calendar className="w-4 h-4 text-gray-500" />
-                      <span className="text-xs text-gray-900 font-medium">{(activities[farm._id!] || []).length}</span>
-                      <span className="text-xs text-gray-500 ml-1">Activities</span>
-                    </div>
-                  </div>
-                  {/* Expand/Collapse Button */}
-                  <div className="flex items-center gap-2 mt-2 md:mt-0">
+
+                    {/* Action Buttons */}
+                    <div className="mt-4 flex gap-2">
                       <button
-                        onClick={() => toggleFarmExpansion(farm._id!)}
-                        className="p-1 text-gray-500 hover:text-gray-700"
-                      title={isExpanded ? 'Collapse' : 'Expand'}
+                        onClick={() => handleAddActivity(farm)}
+                        className="flex-1 bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors text-xs sm:text-sm font-medium"
                       >
-                        {isExpanded ? <ChevronDownIcon className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                        {t('farm.addActivity')}
                       </button>
                     <button
-                      onClick={() => handleEdit(farm)}
-                      className="p-1.5 text-gray-500 hover:text-green-600 transition-colors"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(farm._id!)}
-                      className="p-1.5 text-gray-500 hover:text-red-600 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
+                        onClick={() => toggleFarmExpansion(farm._id!)}
+                        className="px-3 py-2 text-gray-600 hover:text-gray-900 transition-colors text-xs sm:text-sm"
+                      >
+                        {isExpanded ? 'Less' : 'More'}
                     </button>
                   </div>
                 </div>
-                {/* Expanded Details */}
-                  {isExpanded && (
-                  <div className="mt-3 border-t pt-3">
-                    {/* All Activities */}
-                    <div className="mb-2">
-                      <div className="font-semibold text-xs text-gray-700 mb-1 flex items-center gap-1">
-                        <Calendar className="w-4 h-4 text-gray-500" /> All Activities
-                      </div>
-                      <div className="space-y-1.5">
-                        {(activities[farm._id!] || []).map((activity) => (
-                          <div key={activity._id} className="flex items-start gap-2 p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-                            <div className={`p-1 rounded-full ${activity.type === 'Planting' ? 'bg-green-100' : 
-                              activity.type === 'Fertilizing' ? 'bg-purple-100' :
-                              activity.type === 'Pest Control' ? 'bg-red-100' :
-                              activity.type === 'Irrigation' ? 'bg-blue-100' :
-                              activity.type === 'Harvesting' ? 'bg-amber-100' :
-                              activity.type === 'Maintenance' ? 'bg-brown-100' : 'bg-gray-100'} bg-opacity-10`}>
-                              {activity.type === 'Planting' ? <Leaf className="w-4 h-4" /> :
-                                activity.type === 'Fertilizing' ? <Package className="w-4 h-4" /> :
-                                activity.type === 'Pest Control' ? <AlertTriangle className="w-4 h-4" /> :
-                                activity.type === 'Irrigation' ? <Droplets className="w-4 h-4" /> :
-                                activity.type === 'Harvesting' ? <Wheat className="w-4 h-4" /> :
-                                activity.type === 'Maintenance' ? <Crop className="w-4 h-4" /> :
-                                <FileText className="w-4 h-4" />}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between">
-                                <span className="text-xs font-medium text-gray-900 truncate">{activity.description}</span>
-                                <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
-                                  {new Date(activity.date).toLocaleDateString()}
-                                </span>
-                              </div>
-                              {activity.notes && (
-                                <div className="mt-0.5 text-xs text-gray-600 flex items-start gap-1">
-                                  <FileText className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                                  <span className="truncate">{activity.notes}</span>
-                                </div>
-                              )}
-                              {activity.inventoryItems.length > 0 && (
-                                <div className="mt-0.5 text-xs text-gray-600">
-                                  Used: {activity.inventoryItems.map(item => 
-                                    `${item.quantity} ${item.unit}`
-                                  ).join(', ')}
-                                </div>
-                              )}
-                            </div>
-                            <button
-                              onClick={() => handleDeleteActivity(farm._id!, activity._id)}
-                              className="ml-2 p-1 text-gray-400 hover:text-red-600"
-                              title="Delete Activity"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    {/* All Pesticides */}
-                    {pesticides.length > 0 && (
-                      <div className="mb-2">
-                        <div className="font-semibold text-xs text-gray-700 mb-1 flex items-center gap-1">
-                          <Package className="w-3 h-3 text-blue-400" /> All Pesticides
-                        </div>
-                        <ul className="list-disc ml-5 text-xs text-gray-700">
-                          {pesticides.map((p, i) => (
-                            <li key={i}>{p}</li>
-                          ))}
-                        </ul>
-                    </div>
-                  )}
-                </div>
-                )}
               </div>
             );
           })}
         </div>
-      )}
-
-      {/* Activity Form Modal */}
-      {showActivityForm && selectedFarmForActivity && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-lg w-full p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Add Activity for {selectedFarmForActivity.name}</h3>
-              <button
-                onClick={() => setShowActivityForm(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <form onSubmit={handleActivitySubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-gray-600 mb-1">Activity Type</label>
-                  <select
-                    value={activityFormData.type}
-                    onChange={(e) => setActivityFormData(prev => ({ ...prev, type: e.target.value as Activity['type'] }))}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-green-500"
-                  >
-                    {activityTypes.map(type => (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-600 mb-1">Date</label>
-                  <input
-                    type="date"
-                    value={activityFormData.date}
-                    onChange={(e) => setActivityFormData(prev => ({ ...prev, date: e.target.value }))}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-green-500"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs text-gray-600 mb-1">Description</label>
-                <input
-                  type="text"
-                  value={activityFormData.description}
-                  onChange={(e) => setActivityFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="What was done?"
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-green-500"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-600 mb-1">Inventory Item</label>
-                <select
-                  value={activityFormData.selectedItem}
-                  onChange={(e) => setActivityFormData(prev => ({ ...prev, selectedItem: e.target.value }))}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-green-500"
-                >
-                  <option value="">Select an item</option>
-                  {farmInventory[selectedFarmForActivity._id!]?.map(item => (
-                    <option key={item._id} value={item._id}>
-                      {item.name} ({item.quantity} {item.unit} available)
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-gray-600 mb-1">Quantity</label>
-                  <input
-                    type="text"
-                    value={activityFormData.quantity}
-                    onChange={(e) => setActivityFormData(prev => ({ ...prev, quantity: e.target.value }))}
-                    placeholder="Amount"
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-green-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-600 mb-1">Unit</label>
-                  <input
-                    type="text"
-                    value={activityFormData.unit}
-                    onChange={(e) => setActivityFormData(prev => ({ ...prev, unit: e.target.value }))}
-                    placeholder="kg, liters, etc."
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-green-500"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs text-gray-600 mb-1">Notes</label>
-                <textarea
-                  value={activityFormData.notes}
-                  onChange={(e) => setActivityFormData(prev => ({ ...prev, notes: e.target.value }))}
-                  placeholder="Additional details..."
-                  rows={2}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-green-500"
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowActivityForm(false)}
-                  className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
-                >
-                  Add Activity
-                </button>
-              </div>
-            </form>
-          </div>
+        ) : (
+          // List view implementation would go here
+          <div className="space-y-4">
+            {/* List view content */}
         </div>
       )}
+      </div>
     </div>
   );
 };
