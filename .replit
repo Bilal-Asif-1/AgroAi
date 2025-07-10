@@ -1,1 +1,0 @@
-run = "cd backend && npx ts-node src/index.ts" 
