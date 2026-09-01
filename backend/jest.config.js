@@ -14,11 +14,3 @@ module.exports = {
     '/node_modules/',
     '/dist/',
     '/coverage/'
-  ],
-  setupFiles: ['<rootDir>/src/test/setup.ts'],
-  globals: {
-    'ts-jest': {
-      tsconfig: 'tsconfig.json'
-    }
-  }
-}; 
