@@ -1,4 +1,8 @@
+# Inventory Management System
 
+A full-stack inventory management system built with Express.js, MongoDB, and React.
+
+## Features
 
 - User authentication with JWT
 - CRUD operations for inventory items
