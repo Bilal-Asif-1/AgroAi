@@ -2,7 +2,16 @@
 
 A full-stack inventory management system built with Express.js, MongoDB, and React.
 
+## Features
 
+- User authentication with JWT
+- CRUD operations for inventory items
+- Protected routes
+- Rate limiting
+- Logging
+- Environment-based configuration
+
+## Prerequisites
 
 - Node.js (v14 or higher)
 - MongoDB (v4.4 or higher)
